@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Results</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1,h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        .result-table th {
+            background-color: #f2f2f2;
+        }
+        .print-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .print-btn:hover {
+            background-color: #218838;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .container, .container * {
+                visibility: visible;
+            }
+            .container {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                border: none;
+                box-shadow: none;
+            }
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>P.T.Lee Chengalvaraya Naicker Polytechnic College, Chennai - 600 007</h1>
+    <h1>Department of Mechanical Engineering</h1>
+    <h2>Internal Exam Results</h2>
+    <h2>Continuous Assesment Test - I</h2>
+    <h2>Student Result Portal</h2>
+    <input type="text" id="regNo" placeholder="Enter Registration Number">
+    <button onclick="getResult()">Get Result</button>
+
+    <div class="result" id="result"></div>
+    <h5>Note : NYC - Not Yet Conducted</h5>
+
+    <button class="print-btn" id="printBtn" style="display: none;" onclick="window.print()">Print Result</button>
+</div>
+
+<script>
+    // Sample Data from CSV (Embed your actual data here)
+    const data = `S.No,Register No,Name,1020233110 MP,1020233230 SOM,1020233320 WP,1020233440 IDC,1020233540 PDM,1020233640 MTT,*** RESULT,*** No. of. Papers Fail
+1,24202378,ABDULLAH J,A,A,A,NYC,NYC,A,FAIL,4
+2,24202379,AKASH P,A,A,A,NYC,NYC,A,FAIL,4
+3,24220463,AMOSE RENOLD D,A,0,40,NYC,NYC,40,FAIL,2
+4,24220464,ASHRAF K,22,6,A,NYC,NYC,40,FAIL,2
+5,24202380,BALA SUBRAMANI S,43,46,41,NYC,NYC,40,PASS,0
+6,24202381,BALAJI S,A,A,A,NYC,NYC,A,FAIL,4
+7,24220465,CHANDRU U,7,14,A,NYC,NYC,35,FAIL,3
+8,24202385,CITHESH B,22,24,39,NYC,NYC,35,PASS,0
+9,24202386,DEVESH KUMAAR V,33,27,42,NYC,NYC,40,PASS,0
+10,24220466,DHANUSH S,2,20,41,NYC,NYC,30,FAIL,1
+11,24202387,DHAYANIDHI R,28,22,40,NYC,NYC,30,PASS,0
+12,24202388,DHINAKARAN S,6,26,43,NYC,NYC,35,FAIL,1
+13,24202389,DHINESH C,9,40,39,NYC,NYC,40,FAIL,1
+14,24202390,DINESH R,A,A,41,NYC,NYC,A,FAIL,3
+15,24202391,GOKULA KRISHNAN V,32,27,40,NYC,NYC,40,PASS,0
+16,24220468,HARI D,A,5,39,NYC,NYC,A,FAIL,3
+17,24202392,HARIHARAN S,16,30,44,NYC,NYC,40,FAIL,1
+18,24202393,HARIPRIYAN G,22,12,A,NYC,NYC,40,FAIL,2
+19,24202395,HARISH L,A,A,39,NYC,NYC,40,FAIL,2
+20,24220469,JAGADISH M,3,0,A,NYC,NYC,A,FAIL,4
+21,24220470,JEEVITHA A,32,3,37,NYC,NYC,35,FAIL,1
+22,24202396,JEROLD GRIMES.P,44,50,40,NYC,NYC,40,PASS,0
+23,24220471,JEROVADHAN.A,30,9,38,NYC,NYC,30,FAIL,1
+24,24220472,KAARTHICK S,4,0,37,NYC,NYC,25,FAIL,2
+25,24202397,KAMALESH V,23,14,40,NYC,NYC,40,FAIL,1
+26,24202398,KAPILASH V,24,24,38,NYC,NYC,35,PASS,0
+27,24220474,KARTHIK M,A,A,A,NYC,NYC,A,FAIL,4
+28,24220475,KRISHNAKUMAR V,30,43,40,NYC,NYC,40,PASS,0
+29,24202399,MADHAN KOWSHIK K N,A,A,A,NYC,NYC,A,FAIL,4
+30,24202400,MADHAN PRABU K,5,18,40,NYC,NYC,A,FAIL,3
+31,24202401,MADHESHWARAN R,10,0,38,NYC,NYC,30,FAIL,2
+32,24220476,MAHENDRAN R,A,A,A,NYC,NYC,A,FAIL,4
+33,24220477,MOHAMMAD ABRAAR I,34,39,39,NYC,NYC,40,PASS,0
+34,24220478,MOHAMMED AJARUDEEN S,26,0,A,NYC,NYC,30,FAIL,2
+35,24202402,MOHAMMED HAJA HAMEED K,21,0,37,NYC,NYC,30,FAIL,1
+36,24220480,MOHAMMED THAMEEM ANSARI,A,A,A,NYC,NYC,A,FAIL,4
+37,24220481,MOHAN KUMAR S,4,0,37,NYC,NYC,30,FAIL,2
+38,24202403,MONISHWAR K,22,0,39,NYC,NYC,30,FAIL,1
+39,24202404,MUKESH V,A,A,37,NYC,NYC,40,FAIL,2
+40,24202405,MUKESH KUMAR M,33,10,37,NYC,NYC,30,FAIL,1
+41,LE1,ABINASH C,32,23,40,NYC,NYC,A,FAIL,1
+42,LE2,ALLAN PRADEEP,13,5,38,NYC,NYC,40,FAIL,2
+43,LE3,GOKUL RAJ R,10,10,37,NYC,NYC,30,FAIL,2
+44,LE4,HARIKRISHNAN N,22,22,A,NYC,NYC,40,FAIL,1
+45,LE5,JAGAN M,20,14,37,NYC,NYC,30,FAIL,1
+46,LE6,KARTHIKE B,30,21,A,NYC,NYC,45,FAIL,1
+47,LE7,KARTHIKEYAN M,25,12,39,NYC,NYC,30,FAIL,1
+48,LE8,LOGESHWARAN V,24,A,38,NYC,NYC,30,FAIL,1
+49,LE9,MAGESH M,23,28,39,NYC,NYC,45,PASS,0
+50,LE10,MOHAN M,10,A,50,NYC,NYC,45,FAIL,2
+1,23202345,PRANESH KUMAR V,8,8,37,NYC,NYC,47,FAIL,2
+2,24202406,MUKESH RAJ . P,A,0,40,NYC,NYC,55,FAIL,2
+3,24202407,MUTHU VENKATESH M,7,0,37,NYC,NYC,56,FAIL,2
+4,24202408,NAGANDARAN S,0,A,A,NYC,NYC,A,FAIL,4
+5,24220484,NAGARAJ J,A,0,37,NYC,NYC,57,FAIL,2
+6,24202409,NANDHAKUMAR D,20,28,41,NYC,NYC,57,PASS,0
+7,24202410,NARASIMMAN V,20,30,39,NYC,NYC,56,PASS,0
+8,24220485,PRADHAP S,A,A,A,NYC,NYC,33,FAIL,3
+9,24220486,RAGESH KANNAN M,A,0,38,NYC,NYC,41,FAIL,2
+10,24220487,RAGHUL C,A,A,36,NYC,NYC,44,FAIL,2
+11,24202411,RAGUL V,A,20,39,NYC,NYC,54,FAIL,1
+12,24220488,RAHUL M,A,A,A,NYC,NYC,A,FAIL,4
+13,24220489,RAJESH KANNAN.S,A,A,A,NYC,NYC,A,FAIL,4
+14,24220490,RAJKUMAR V,0,10,40,NYC,NYC,51,FAIL,2
+15,24220493,SALAMON S,A,14,A,NYC,NYC,A,FAIL,4
+16,24202412,SANTHOSH D,20,32,37,NYC,NYC,59,PASS,0
+17,24220495,SASI KUMAR A,0,0,37,NYC,NYC,44,FAIL,2
+18,24202413,SHAIRISHEE D,0,8,32,NYC,NYC,33,FAIL,2
+19,24202414,SHANMUGA PRIYAN V,0,A,37,NYC,NYC,56,FAIL,2
+20,24220496,SHARMAN.S,6,15,39,NYC,NYC,58,FAIL,2
+21,24202415,SHYAM PRASATH.U,8,7,40,NYC,NYC,55,FAIL,2
+22,24202416,SRI PRIYAN . R,5,0,38,NYC,NYC,56,FAIL,2
+23,24202417,SRIKANTH R,37,45,41,NYC,NYC,59,PASS,0
+24,24202418,SUDHARSUN.B,0,A,A,NYC,NYC,A,FAIL,4
+25,24220497,SUDIPTA SAIKRISHNA,1,23,39,NYC,NYC,55,FAIL,1
+26,24220498,SUREN KUMAR R,4,6,36,NYC,NYC,51,FAIL,2
+27,24220501,SYED NISAMUDIN S,0,0,40,NYC,NYC,43,FAIL,2
+28,24202420,TAMILMANI S,0,A,38,NYC,NYC,A,FAIL,3
+29,24202421,THARUN . K,0,10,37,NYC,NYC,53,FAIL,2
+30,24202422,THARUN N,7,32,39,NYC,NYC,57,FAIL,1
+31,24202423,THARUN S,1,0,39,NYC,NYC,41,FAIL,2
+32,24220502,VETRI S,0,2,39,NYC,NYC,43,FAIL,2
+33,24202424,VIGNESHWARAN T,A,A,A,NYC,NYC,A,FAIL,4
+34,24202425,VIJAYARAGHAVAN.A,27,25,39,NYC,NYC,57,PASS,0
+35,24202426,VIJYA SUNDAR S,A,A,A,NYC,NYC,A,FAIL,4
+36,24220503,VIKRAM.K,0,0,A,NYC,NYC,A,FAIL,4
+37,24220504,VISHAL J,0,A,37,NYC,NYC,47,FAIL,2
+38,24202427,VISHAL S,39,30,38,NYC,NYC,55,PASS,0
+39,24202428,WILLINGTON CHRISTOPHER E,45,45,38,NYC,NYC,57,PASS,0
+40,24202429,YOKESH.N,0,2,39,NYC,NYC,43,FAIL,2
+41,LE11,MURUGAN S,8,25,A,NYC,NYC,58,FAIL,2
+42,LE12,PARASURAM R,8,8,39,NYC,NYC,54,FAIL,2
+43,LE13,PREMKUMAR D,13,29,40,NYC,NYC,56,FAIL,1
+44,LE14,SAKTHIKUMAR,0,4,38,NYC,NYC,39,FAIL,2
+45,LE15,SANTHOSH K,4,16,40,NYC,NYC,38,FAIL,2
+46,LE16,SARATHKUMAR S,13,15,41,NYC,NYC,54,FAIL,2
+47,LE17,SURIYAPRAKASH I,A,A,A,NYC,NYC,A,FAIL,4
+48,LE18,YOGESHWARA RAO G,9,23,39,NYC,NYC,A,FAIL,2
+49,LE19,YUVAN RAJ M,A,A,A,NYC,NYC,A,FAIL,4
+50,LE20,SHANJEEV R,32,27,42,NYC,NYC,54,PASS,0
+`;
+
+    // Convert CSV to JSON
+    const parseCSV = (csv) => {
+        const lines = csv.split("\n");
+        const headers = lines[0].split(",");
+        const students = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const currentLine = lines[i].split(",");
+            const student = {};
+
+            for (let j = 0; j < headers.length; j++) {
+                student[headers[j]] = currentLine[j];
+            }
+
+            students.push(student);
+        }
+        return students;
+    };
+
+    const studentsData = parseCSV(data);
+
+    function getResult() {
+        const regNo = document.getElementById('regNo').value;
+        const resultDiv = document.getElementById('result');
+        const printBtn = document.getElementById('printBtn');
+
+        const student = studentsData.find(s => s["Register No"] === regNo);
+
+        if (student) {
+            resultDiv.innerHTML = `
+                <h3>Student Name :  ${student.Name}</h3>
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Marks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1020233110</td>
+                            <td>MP</td>
+                            <td>${student["1020233110 MP"]}</td>
+                        </tr>
+                        <tr>
+                            <td>1020233230</td>
+                            <td>SOM</td>
+                            <td>${student["1020233230 SOM"]}</td>
+                        </tr>
+                        <tr>
+                            <td>1020233320</td>
+                            <td>WP</td>
+                            <td>${student["1020233320 WP"]}</td>
+                        </tr>
+                        <tr>
+                            <td>1020233440</td>
+                            <td>IDC</td>
+                            <td>${student["1020233440 IDC"]}</td>
+                        </tr>
+                        <tr>
+                            <td>1020233540</td>
+                            <td>PDM</td>
+                            <td>${student["1020233540 PDM"]}</td>
+                        </tr>
+                        <tr>
+                            <td>1020233640</td>
+                            <td>MTT</td>
+                            <td>${student["1020233640 MTT"]}</td>
+                        </tr>
+                        <tr>
+                            <td>***</td>
+                            <td>RESULT</td>
+                            <td>${student["*** RESULT"]}</td>
+                        </tr>
+                        <tr>
+                            <td>***</td>
+                            <td>No. of. Papers Fail</td>
+                            <td>${student["*** No. of. Papers Fail"]}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            printBtn.style.display = 'block';
+        } else {
+            resultDiv.innerHTML = '<p style="color:red;">Registration number not found.</p>';
+            printBtn.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
